@@ -1,7 +1,7 @@
 # Challenge : Prédiction des performances d'allocations d'actifs
 > **Mantra du challenge :** Faire confiance, ou parier contre ?
 
-Dans le monde du trading systématique, les allocations d'actifs sont omniprésentes — mais la qualité des signaux fait toute la différence. 
+Dans le monde du trading systématique, les allocations d'actifs sont omniprésentes — mais la qualité des signaux fait toute la différence.
 
 Chaque jour, les traders sont submergés d'allocations candidates : des constructions de portefeuille fondées sur des signaux prédictifs récents, des flux de liquidité ou des schémas historiques. Certaines de ces allocations seront profitables lors de la prochaine session de trading. D'autres sous-performeront ou, pire, seront perdantes de manière si consistante que parier contre elles serait le choix le plus profitable.
 
@@ -11,7 +11,7 @@ Ce challenge se centre autour d'une question simple mais cruciale : **Pouvez-vou
 
 ## 💡 Qu'est-ce qu'une allocation d'actifs ?
 
-Une allocation d'actifs peut être définie comme une **méthode systématique de construction de portefeuille** utilisant des signaux ou des règles prédéfinies. 
+Une allocation d'actifs peut être définie comme une **méthode systématique de construction de portefeuille** utilisant des signaux ou des règles prédéfinies.
 
 Dans ce challenge :
 * Chaque allocation est définie par un **vecteur de poids** (positifs ou négatifs), fixés chaque jour et tenus pour toute une session de trading.
@@ -66,7 +66,7 @@ $$Accuracy = \frac{1}{T \times M} \sum_{t=1}^{T} \sum_{S=1}^{M} \mathbf{1}_{[\te
 
 ## 🗄️ Description des Données
 
-Le dataset se présente sous la forme de **séries temporelles** avec un multi-index `(date, allocation)`. 
+Le dataset se présente sous la forme de **séries temporelles** avec un multi-index `(date, allocation)`.
 
 ### Liste des Colonnes
 
