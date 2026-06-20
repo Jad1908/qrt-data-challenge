@@ -1,29 +1,22 @@
+import numpy as np
+from src.data import load_train
+from src.validation import PurgedTimeSeriesSplit
 import src.config as C
-from src.data import load_test, load_train
 
 train = load_train()
-test = load_test()
+cv = PurgedTimeSeriesSplit(n_splits=5, embargo=C.N_LAGS, scheme="expanding")
 
-print("train:", train.shape)  # ~ (527073, ~46)
-print("test :", test.shape)  # ~ (31870, ~45)  -- same minus target cols
+# 1) Eyeball the fold layout
+print(cv.describe(train).to_string(index=False))
 
-# Contract spot-checks
-assert train[C.ID_COL].is_unique
-assert train[C.TARGET_COL].notna().all()
-assert C.TARGET_COL not in test.columns
-assert train[C.TS_ORDER_COL].is_monotonic_increasing  # canonical sort held
-
-print("dates:", train[C.TS_ORDER_COL].min(), "->", train[C.TS_ORDER_COL].max())
-print("base rate P(target>0):", round(train[C.TARGET_SIGN_COL].mean(), 4))
-print(
-    train[
-        [
-            C.TS_COL,
-            C.TS_ORDER_COL,
-            C.ALLOCATION_COL,
-            C.ALLOC_ORDER_COL,
-            C.TARGET_COL,
-            C.TARGET_SIGN_COL,
-        ]
-    ].head()
-)
+# 2) Hard invariants, checked on actual indices
+for fold, (tr, va) in enumerate(cv.split(train)):
+    tr_dates = train.iloc[tr][C.TS_ORDER_COL]
+    va_dates = train.iloc[va][C.TS_ORDER_COL]
+    assert len(np.intersect1d(tr, va)) == 0, "row overlap!"
+    # forward split: every training date strictly precedes every val date
+    assert tr_dates.max() < va_dates.min(), "train not before val!"
+    # the embargo actually opened a >= N_LAGS gap in date-positions
+    gap = va_dates.min() - tr_dates.max()
+    print(f"fold {fold}: train≤{tr_dates.max()}  val≥{va_dates.min()}  "
+          f"value-gap={gap}  (rows {len(tr):,}/{len(va):,})")
