@@ -15,6 +15,7 @@ exact minimum that closes both.
 Yielded indices are POSITIONAL (0..n-1 into the canonical frame) — use with
 DataFrame.iloc / numpy indexing. This relies on data.py's reset_index.
 """
+
 from __future__ import annotations
 
 import warnings
@@ -29,6 +30,7 @@ from src import config as C
 @dataclass
 class FoldInfo:
     """Human-readable description of one fold, for the describe() diagnostic."""
+
     fold: int
     n_train_dates: int
     n_val_dates: int
@@ -57,8 +59,9 @@ class PurgedTimeSeriesSplit:
     1..n_splits are the validation folds (the last absorbs any remainder).
     """
 
-    def __init__(self, n_splits: int = 5, embargo: int = C.N_LAGS,
-                 scheme: str = "expanding"):
+    def __init__(
+        self, n_splits: int = 5, embargo: int = C.N_LAGS, scheme: str = "expanding"
+    ):
         if n_splits < 1:
             raise ValueError("n_splits must be >= 1")
         if scheme not in ("expanding", "rolling"):
@@ -126,7 +129,9 @@ class PurgedTimeSeriesSplit:
                     f"large for the fold size). Reduce n_splits or embargo."
                 )
 
-            train_idx = self._rows_for(unique_dates, date_to_rows, train_start, train_end)
+            train_idx = self._rows_for(
+                unique_dates, date_to_rows, train_start, train_end
+            )
             val_idx = self._rows_for(unique_dates, date_to_rows, val_start, val_end)
             yield train_idx, val_idx
 
@@ -138,22 +143,27 @@ class PurgedTimeSeriesSplit:
 
         for fold, (val_start, val_end) in enumerate(self._bounds(T)):
             train_end = val_start - self.embargo
-            train_start = 0 if self.scheme == "expanding" \
+            train_start = (
+                0
+                if self.scheme == "expanding"
                 else max(0, train_end - T // (self.n_splits + 1))
+            )
 
             tr = self._rows_for(unique_dates, date_to_rows, train_start, train_end)
             va = self._rows_for(unique_dates, date_to_rows, val_start, val_end)
 
-            rows.append(FoldInfo(
-                fold=fold,
-                n_train_dates=train_end - train_start,
-                n_val_dates=val_end - val_start,
-                n_train_rows=len(tr),
-                n_val_rows=len(va),
-                train_date_first=int(unique_dates[train_start]),
-                train_date_last=int(unique_dates[train_end - 1]),
-                val_date_first=int(unique_dates[val_start]),
-                val_date_last=int(unique_dates[val_end - 1]),
-                embargo_gap_dates=val_start - train_end,
-            ))
+            rows.append(
+                FoldInfo(
+                    fold=fold,
+                    n_train_dates=train_end - train_start,
+                    n_val_dates=val_end - val_start,
+                    n_train_rows=len(tr),
+                    n_val_rows=len(va),
+                    train_date_first=int(unique_dates[train_start]),
+                    train_date_last=int(unique_dates[train_end - 1]),
+                    val_date_first=int(unique_dates[val_start]),
+                    val_date_last=int(unique_dates[val_end - 1]),
+                    embargo_gap_dates=val_start - train_end,
+                )
+            )
         return pd.DataFrame([r.__dict__ for r in rows])
